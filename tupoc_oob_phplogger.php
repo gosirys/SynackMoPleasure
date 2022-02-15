@@ -21,7 +21,15 @@ How to use this:
 
 How to set this up:
 
-	Compile notify (Project Discovery) on your computer,
+	** Compile notify (Project Discovery) on your computer ** < NO 
+	The most recent version of their notify doesn't have support for the 
+	"-rl" flag, which when set doesnt enforce TLS verification on
+	network connections. When I realiased that, I compiled an older version
+	of it that still had support for that flag. I uploaded the binary in 
+	this repo, so just use that one. If you don't trust it (Osirys is bad
+	and backdoored it), then feel free to go back on github and find their
+	previous version with support for that flag and compile it yourself.
+	
 	then upload it in a folder under your $_SERVER['HOME']
 	within TuPOC. Don't forget to chmod+x it
 	As per notify's docs, create your config file and also

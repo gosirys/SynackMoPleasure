@@ -2,7 +2,7 @@
 
 /*
 Title: OOB HTTP Request logger for TuPOC with Discord notification
-Author: by Osirys
+Author: @osiryszzz
 
 What this script does:
 	This PHP script will fetch the entire HTTP request from the client, store
@@ -21,32 +21,59 @@ How to use this:
 
 How to set this up:
 
-	** Compile notify (Project Discovery) on your computer ** < NO 
-	The most recent version of their notify doesn't have support for the 
-	"-rl" flag, which when set doesnt enforce TLS verification on
-	network connections. When I realiased that, I compiled an older version
-	of it that still had support for that flag. I uploaded the binary in 
-	this repo, so just use that one. If you don't trust it (Osirys is bad
-	and backdoored it), then feel free to go back on github and find their
-	previous version with support for that flag and compile it yourself.
+	The most recent version of notify doesn't have support for the 
+	"-rl" flag anymore, which had TLS checks disabled when used.
+	When I realiased this I went on and compiled an older version
+	that still supported it and uploaded the binary in this repo. 
+	If you don't trust it (Osirys is bad and backdoored it), then feel
+	free to go back on github and find their previous version with support
+	for that flag and compile it yourself.
 	
-	then upload it in a folder under your $_SERVER['HOME']
-	within TuPOC. Don't forget to chmod+x it
-	As per notify's docs, create your config file and also
-	place it within your $_SERVER['HOME']
-
-	Then put as per below:
+	From within "/" of your TuPOC (as seen from the chrooted environment),
+	please, start with "cd ." to make sure you are at the right place.
+	Create a folder (eg: lamerlolz).
+	You should have now this FS structure:
+		/httpdocs/
+		/bin/
+		... snip ...
+		/lamerlolz/
+	
+	Upload the below onto /lamerlolz/
 		1. notify's binary path 
 		2. notify's yaml config path
+	
+	Now, set the values of $notify_bin_path and $notify_yaml_path of this script
+	to point to that folder in this manner:
+		"/lamerlolz/notify"
+		"/lamerlolz/notify_config.yaml"
 
-	Then, create a folder in the directory where you will put this script
-	for storing interaction logs, and set its value below.
-	Make sure PHP has write access to it.
+	Then, within "/httpdocs/" create a folder (oob_logs_whatever) for storing the
+	interaction logs and set its value (/httpdocs/oob_logs_whatever) to $oob_logs_path.
+	-> Do not remove the $_SERVER['HOME'] bits.
+	
+	This PHP script should be placed at the same directory where oob_logs_whatever is.
+	
+	Example syntax of notify.yaml config
+	
+	-------------------------------------------
+	discord:
+  	    - id: "notify"
+    		discord_channel: "<chan>"
+    		discord_username: "<nick>"
+    		discord_format: "{{data}}"
+    		discord_webhook_url: "<URL>"
+		
+	-------------------------------------------
 
+	It needs to have the provider set to "discord" and the "id" set to "notify"
+	or else you will need to change the args in the $cmd variable in this script
+	to reflect your yaml.
+	Sure I could add extra config vars like below but be real it's a tiny script
+	no need for over-engineering.
 */
 
-$notify_bin_path="/osyfgfdghjdj/notify";
-$notify_yaml_path="/osyfgfdghjdj/notify_config.yaml";
+$notify_bin_path=$_SERVER['HOME']."/lamerlolz/notify";
+$notify_yaml_path=$_SERVER['HOME']."/lamerlolz/notify_config.yaml";
 $oob_logs_path="/oob_logs_whatever/";
 
 function myshellexec($cfe) {
@@ -168,8 +195,8 @@ function logRequest($targetFile,$oob_notification_filename,$label){
 	$not_str="**OOB just triggered on TuPOC**".$label_str."Check log file: *".basename($targetFile)."*\n";
 	file_put_contents($oob_notification_filename,$not_str);
 	
-	$cmd=$_SERVER['HOME'].$notify_bin_path." -id notify -provider discord -provider-config ".
-	$_SERVER['HOME'].$notify_yaml_path." -rl 1 -bulk -data ".$oob_notification_filename;
+	$cmd=$notify_bin_path." -id notify -provider discord -provider-config ".
+	$notify_yaml_path." -rl 1 -bulk -data ".$oob_notification_filename;
 	
 	$output=myshellexec($cmd." 2>&1");
 

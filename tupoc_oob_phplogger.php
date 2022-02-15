@@ -49,12 +49,10 @@ How to set this up:
 
 	Then, within "/httpdocs/" create a folder (oob_logs_whatever) for storing the
 	interaction logs and set its value (/httpdocs/oob_logs_whatever) to $oob_logs_path.
-	-> Do not remove the $_SERVER['HOME'] bits.
 	
-	This PHP script should be placed at the same directory where oob_logs_whatever is.
+	This PHP script should be placed in the same directory where oob_logs_whatever is.
 	
-	Example syntax of notify.yaml config
-	
+	Example syntax of notify.yaml config (replace <stuff> accordingly)
 	-------------------------------------------
 	discord:
   	    - id: "notify"
@@ -70,11 +68,17 @@ How to set this up:
 	to reflect your yaml.
 	Sure I could add extra config vars like below but be real it's a tiny script
 	no need for over-engineering.
+
 */
 
-$notify_bin_path=$_SERVER['HOME']."/lamerlolz/notify";
-$notify_yaml_path=$_SERVER['HOME']."/lamerlolz/notify_config.yaml";
+// Update below
+
+$notify_bin_path="/lamerlolz/notify";
+$notify_yaml_path="/lamerlolz/notify_config.yaml";
 $oob_logs_path="/oob_logs_whatever/";
+
+// End of edits required
+
 
 function myshellexec($cfe) {
 	$res = '';
@@ -156,6 +160,9 @@ function getIPAddress() {
 }  
 
 function logRequest($targetFile,$oob_notification_filename,$label){
+
+	global $notify_bin_path, $notify_yaml_path, $oob_logs_path;
+
 	$headerList = [];
 	foreach ($_SERVER as $name => $value) {
 
@@ -195,8 +202,8 @@ function logRequest($targetFile,$oob_notification_filename,$label){
 	$not_str="**OOB just triggered on TuPOC**".$label_str."Check log file: *".basename($targetFile)."*\n";
 	file_put_contents($oob_notification_filename,$not_str);
 	
-	$cmd=$notify_bin_path." -id notify -provider discord -provider-config ".
-	$notify_yaml_path." -rl 1 -bulk -data ".$oob_notification_filename;
+	$cmd = $_SERVER['HOME'].$notify_bin_path." -id notify -provider discord -provider-config ".
+	$_SERVER['HOME'].$notify_yaml_path." -rl 1 -bulk -data ".$oob_notification_filename;
 	
 	$output=myshellexec($cmd." 2>&1");
 
